@@ -7,29 +7,32 @@ WITH base_events AS (
     device.operating_system AS operating_system,
     device.web_info.browser AS browser,
     device.language AS device_language,
-    -- Added Geo Dimensions
     geo.city AS city,
     geo.continent AS continent,
     geo.region AS region,
     geo.sub_continent AS sub_continent,
     geo.metro AS metro,
-    -- Session Attribution
+    -- Individual Attribution
     session_traffic_source_last_click.manual_campaign.source AS session_source,
     session_traffic_source_last_click.manual_campaign.medium AS session_medium,
     session_traffic_source_last_click.manual_campaign.campaign_name AS session_campaign,
-    -- URL Cleaning
+    -- The Merged Column: source-medium
+    CONCAT(
+      LOWER(COALESCE(session_traffic_source_last_click.manual_campaign.source, '(direct)')), 
+      ' / ', 
+      LOWER(COALESCE(session_traffic_source_last_click.manual_campaign.medium, '(none)'))
+    ) AS session_source_medium,
     REGEXP_EXTRACT(
       (SELECT value.string_value FROM UNNEST(event_params) WHERE key = 'page_location'), 
       r'^([^?]+)'
     ) AS page_path,
-    -- Session ID components
     (SELECT value.int_value FROM UNNEST(event_params) WHERE key = 'ga_session_id') AS ga_session_id,
     user_pseudo_id,
     event_name,
     event_timestamp,
     COALESCE(ecommerce.purchase_revenue, 0) AS revenue
   FROM
-    `enter.tablename_123456.events_*` 
+   `enter.tablename_123456.events_*`
   WHERE
     _TABLE_SUFFIX BETWEEN '20240101' AND '20251231'
     AND (SELECT value.int_value FROM UNNEST(event_params) WHERE key = 'ga_session_id') IS NOT NULL
@@ -38,7 +41,6 @@ WITH base_events AS (
 session_landing_pages AS (
   SELECT
     *,
-    -- Identify the first page of the session
     FIRST_VALUE(page_path) OVER (
       PARTITION BY user_pseudo_id, ga_session_id 
       ORDER BY event_timestamp ASC
@@ -55,7 +57,6 @@ SELECT
   EXTRACT(MONTH FROM date) AS month_num,
   FORMAT_DATE('%B', date) AS month_name,
   EXTRACT(ISOWEEK FROM date) AS iso_week,
-  -- Monday=1, Sunday=7 logic
   CASE 
     WHEN EXTRACT(DAYOFWEEK FROM date) = 1 THEN 7 
     ELSE EXTRACT(DAYOFWEEK FROM date) - 1 
@@ -74,20 +75,19 @@ SELECT
   metro,
   session_source,
   session_medium,
+  session_source_medium, -- <--- NEW MERGED COLUMN
   session_campaign,
   landing_page,
   -- Performance Metrics
   COUNT(DISTINCT user_pseudo_id) AS total_users,
   COUNT(DISTINCT CONCAT(user_pseudo_id, CAST(ga_session_id AS STRING))) AS total_sessions,
-  -- Quality Metric (Looking for the 1.0 Bot)
   ROUND(COUNT(*) / NULLIF(COUNT(DISTINCT CONCAT(user_pseudo_id, CAST(ga_session_id AS STRING))), 0), 2) AS events_per_session,
   COUNTIF(event_name = 'purchase') AS total_purchases,
   SUM(revenue) AS total_revenue
 FROM
   session_landing_pages
 GROUP BY
-  1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23
+  1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24
 ORDER BY
   date DESC, 
-  day_num ASC, 
   total_sessions DESC
