@@ -11,11 +11,10 @@ WITH base_events AS (
     geo.region AS region,
     geo.sub_continent AS sub_continent,
     geo.metro AS metro,
-    -- Individual Attribution
+    -- Attribution
     session_traffic_source_last_click.manual_campaign.source AS session_source,
     session_traffic_source_last_click.manual_campaign.medium AS session_medium,
     session_traffic_source_last_click.manual_campaign.campaign_name AS session_campaign,
-    -- The Merged Column: source-medium
     CONCAT(
       LOWER(COALESCE(session_traffic_source_last_click.manual_campaign.source, '(direct)')), 
       ' / ', 
@@ -26,6 +25,7 @@ WITH base_events AS (
       r'^([^?]+)'
     ) AS page_path,
     (SELECT value.int_value FROM UNNEST(event_params) WHERE key = 'ga_session_id') AS ga_session_id,
+    (SELECT value.string_value FROM UNNEST(event_params) WHERE key = 'transaction_id') AS transaction_id,
     user_pseudo_id,
     event_name,
     event_timestamp,
@@ -43,12 +43,18 @@ session_landing_pages AS (
     FIRST_VALUE(page_path) OVER (
       PARTITION BY user_pseudo_id, ga_session_id 
       ORDER BY event_timestamp ASC
-    ) AS landing_page
+    ) AS landing_page,
+    -- Flagging Ghost Transactions for observability
+    CASE 
+      WHEN event_name = 'purchase' AND transaction_id IS NULL THEN 'Ghost/Technical'
+      WHEN event_name = 'purchase' THEN 'Valid ID'
+      ELSE 'Non-Purchase'
+    END AS transaction_status
   FROM base_events
 )
 
 SELECT
-  -- Forensic Dimensions Only (Removed all Date/Time fields)
+  -- Dimension Hierarchy (No Date Dimensions)
   hostname,
   device_category,
   operating_system,
@@ -64,19 +70,22 @@ SELECT
   session_source_medium,
   session_campaign,
   landing_page,
-  -- Performance Metrics
+  transaction_status,
+  
+  -- Aggregated Audit Metrics
   COUNT(DISTINCT user_pseudo_id) AS total_users,
   COUNT(DISTINCT CONCAT(user_pseudo_id, CAST(ga_session_id AS STRING))) AS total_sessions,
-  ROUND(COUNT(*) / NULLIF(COUNT(DISTINCT CONCAT(user_pseudo_id, CAST(ga_session_id AS STRING))), 0), 2) AS events_per_session,
-  -- Purchase Audit Metrics
+  
+  -- Deduplication Logic for 16.5% CVR
   COUNTIF(event_name = 'purchase') AS total_purchases,
   COUNT(DISTINCT CASE WHEN event_name = 'purchase' THEN CONCAT(user_pseudo_id, CAST(ga_session_id AS STRING)) END) AS converted_sessions,
-  -- Duplicate Purchases (The "Refreshed Page" Indicator)
+  
+  -- Audit Variance
   COUNTIF(event_name = 'purchase') - COUNT(DISTINCT CASE WHEN event_name = 'purchase' THEN CONCAT(user_pseudo_id, CAST(ga_session_id AS STRING)) END) AS duplicate_purchases,
   SUM(revenue) AS total_revenue
 FROM
   session_landing_pages
 GROUP BY
-  1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15
+  1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16
 ORDER BY
-  total_sessions DESC
+  total_sessions DESC;
