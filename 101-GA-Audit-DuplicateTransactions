@@ -1,20 +1,24 @@
 SELECT
-  -- 1. Where and How
+  -- 1. Time & Date
+  EXTRACT(DATE FROM TIMESTAMP_MICROS(event_timestamp)) AS date,
+  TIMESTAMP_MICROS(event_timestamp) AS exact_timestamp,
+  
+  -- 2. Tech Stack & Location
   device.web_info.browser,
   device.category AS device_category,
   (SELECT value.string_value FROM UNNEST(event_params) WHERE key = 'page_location') AS page_url,
   
-  -- 2. The Logic: Sessions with >1 Purchase
-  COUNT(DISTINCT (SELECT value.int_value FROM UNNEST(event_params) WHERE key = 'ga_session_id')) AS sessions_with_doubles,
-  
-  -- 3. The Math: (Total Purchase Events) minus (Unique Sessions with Purchases)
-  COUNT(*) - COUNT(DISTINCT (SELECT value.int_value FROM UNNEST(event_params) WHERE key = 'ga_session_id')) AS duplicate_count
+  -- 3. Session Identifier
+  (SELECT value.int_value FROM UNNEST(event_params) WHERE key = 'ga_session_id') AS ga_session_id,
+
+  -- 4. Logic: Identify sessions with more than 1 purchase
+  COUNT(*) OVER (PARTITION BY (SELECT value.int_value FROM UNNEST(event_params) WHERE key = 'ga_session_id')) AS total_purchases_in_this_session
 
 FROM
-  `enter.tablename_123456.events_*`
+   `enter.tablename_123456.events_*`
 WHERE
   event_name = 'purchase'
   AND _TABLE_SUFFIX BETWEEN '20240101' AND '20251231'
-GROUP BY 1, 2, 3
-HAVING duplicate_count > 0
-ORDER BY duplicate_count DESC
+-- Filter to only show the rows that belong to a "Duplicate" session
+QUALIFY total_purchases_in_this_session > 1
+ORDER BY exact_timestamp DESC
