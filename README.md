@@ -12,9 +12,10 @@ The Google Analytics audit + dashboard is E-commerce focused but it can be tweak
 # THE SET-UP
 The steps required:
 
-1. Google Analytics is connected to Big Query
-3. The 101-GA-Audit Big Query code provided, create and save the view in Big Query
-4. Make a copy of the looker studio dashboard and connect it to the saved view
+1. To be able to generate the data to build the dashboard it requires implementing this GTM container > https://github.com/GTMRecipeContainers/Google-Analytics-4-Enhanced-E-commerce it will require configuring the triggers + GA4 event tag that works best for the website
+3. Google Analytics is connected to Big Query
+4. The 101-GA-Audit Big Query code provided, create and save the view in Big Query
+5. Make a copy of the looker studio dashboard and connect it to the saved view
 
 # THE WATCH-OUTS
 The key Watch-Outs: 
