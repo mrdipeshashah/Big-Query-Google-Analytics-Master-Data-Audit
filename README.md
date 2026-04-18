@@ -24,20 +24,11 @@ The key Watch-Outs:
 2. It's important to have the right architecture setup. The above shared GitHub GTM link helps with the architecture if a deeper aduit of events etc is needed
 3. The Big Query code - 101-GA-Audit is the one that should be connected to the dashboard
 4. The Big Query code - 101-GA-Audit-withnodatedimensions is the same as 101-GA-Audit but without the date breakdown if a deeper dive is required without dates  
-5. The Big Query code - 101-GA-Audit-DuplicateTransactions 
-6. The Big Query code  
-7. The Big Query code - purchase-event-tracking is used on the 7 day and yesterday scorecards + transaction ID health table 
-8. The Big Query code - all-events-tracking is used on the event health trend chart + purchase event health v baseline + event volume by journey stage + event audit log
-9. The Trans ID Fill in the scorecard is SUM(is_id_populated)/SUM(is_purchase) and it needs to be using - purchase-event-tracking 
-10. The Trans ID Status which is the dropdown for the Trans ID Health table using the below following which is created as a calculated file in purchase-event-tracking. Add Field > Add Calcularted Field 
-
-  CASE 
-  WHEN is_id_populated = 1 THEN "✅ ID Populated" 
-  ELSE "❌ Missing ID (Red Rows)" 
-  END
+5. The Big Query code - 101-GA-Audit-DuplicateTransactions tracks duplicate transactions that happen within the same session 
+6. The Big Query code - 101-GA-Audit-KPIs provides a daily breakdown of key metrics
+7. Conversion Rate is the only calculated metric thay will need to be added - SUM(converted_sessions)/SUM(total_sessions)
 
 # FILTERING
-
 One of the key outputs from the audit will be how to filter data to provide a better view of performance. The options would be to either filter in Biq Query (hard filter) or in Data Studio (soft filter). 
 
 Exclude In Big Query: 
