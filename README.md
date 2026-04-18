@@ -5,13 +5,14 @@ This repository contains Big Query code using Google Analytics raw data that wil
 2. Landing page performance
 3. Tech stack performance
 4. Data quality performance
-5. Location performance 
+5. Location performance
+
+The Google Analytics audit + dashboard is E-commerce focused but it can be tweaked for any business model i.e. lead generation 
 
 # THE SET-UP
 The steps required:
 
-1. To be able to generate the data to build the dashboard it requires implementing this GTM container > https://github.com/GTMRecipeContainers/Google-Analytics-4-Enhanced-E-commerce it will require configuring the triggers + GA4 event tag that works best for the website
-2. Google Analytics is connected to Big Query
+1. Google Analytics is connected to Big Query
 3. The 2 Big Query code provided, create and save the views in Big Query
 4. Make a copy of the looker studio dashboard and connect it to the saved views
 
