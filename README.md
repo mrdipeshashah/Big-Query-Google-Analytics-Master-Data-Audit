@@ -1,11 +1,11 @@
 # OVERVIEW
-This repository contains Big Query code using Google Analytics raw data tracking the health of events via Google Tag Manager. Tags are critical in the GTM set-up but the common domoino for all platforms is the event/trigger which is used by Google Ads, Meta, Google Analytics etc. The focus is on event performance that any of the different teams working with the different platforms would want assurance on the health of the events.  
+This repository contains Big Query code using Google Analytics raw data that will provide a summary of the Google Analytics data. The data studio dashboard (https://datastudio.google.com/reporting/47aa8820-3e4b-4844-8084-093acf00a59b) that brings will bring many of the insights to life providing a summary to better understamd the business and the data. The dashboard covers: 
 
-(I use event & trigger interchangeably - The best set-up are when the event name + trigger are the same, i.e. event name = purchase, trigger = purchase)
-
-If Google Analytics stops tracking e-commerce sales it means the purchase event/trigger has failed meaning it would also fail for Google Ads, Meta etc. It also means if there are 100 purchase events reported on a given day it means Google Ads, Meta etc cannot be reporting more than 100 purchase events. 
-
-I have developed a looker studio dashboard (https://lookerstudio.google.com/reporting/b3d4ac15-0583-4b5a-a083-32bdbd41d6ca) that brings the insights to life. 
+1. Channel performance
+2. Landing page performance
+3. Tech stack performance
+4. Data quality performance
+5. Location performance 
 
 # THE SET-UP
 The steps required:
