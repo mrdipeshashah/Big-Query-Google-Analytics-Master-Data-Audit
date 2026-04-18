@@ -21,7 +21,7 @@ The steps required:
 The key Watch-Outs: 
 
 1. The most critical step is having Google Analytics connected to Big Query, the 101-GA-Audit is using the default schema in Big Query + purchase event which will need to be setup in Google Tag Manager to provide the insights 
-2. It's important to have the right architecture setup. The above shared GitHub GTM link helps with the architecture if a deepeer aduit of events etc is needed  
+2. It's important to have the right architecture setup. The above shared GitHub GTM link helps with the architecture if a deeper aduit of events etc is needed  
 3. The Big Query code - purchase-event-tracking is used on the 7 day and yesterday scorecards + transaction ID health table 
 4. The Big Query code - all-events-tracking is used on the event health trend chart + purchase event health v baseline + event volume by journey stage + event audit log
 5. The Trans ID Fill in the scorecard is SUM(is_id_populated)/SUM(is_purchase) and it needs to be using - purchase-event-tracking 
