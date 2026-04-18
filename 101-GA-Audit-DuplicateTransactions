@@ -13,19 +13,30 @@ SELECT
   device.web_info.browser AS browser,
 
   -- 4. Time Gap Logic (Minutes since previous purchase in this session)
-  TIMESTAMP_DIFF(
-    TIMESTAMP_MICROS(event_timestamp), 
-    LAG(TIMESTAMP_MICROS(event_timestamp)) OVER (PARTITION BY (SELECT value.int_value FROM UNNEST(event_params) WHERE key = 'ga_session_id') ORDER BY event_timestamp),
-    MINUTE
-  ) AS minutes_since_last_purchase,
+  -- Logic: If identifiers are NULL, return NULL to prevent cross-year noise.
+  CASE 
+    WHEN user_pseudo_id IS NULL OR (SELECT value.int_value FROM UNNEST(event_params) WHERE key = 'ga_session_id') IS NULL THEN NULL
+    ELSE TIMESTAMP_DIFF(
+      TIMESTAMP_MICROS(event_timestamp), 
+      LAG(TIMESTAMP_MICROS(event_timestamp)) OVER (
+        PARTITION BY user_pseudo_id, (SELECT value.int_value FROM UNNEST(event_params) WHERE key = 'ga_session_id') 
+        ORDER BY event_timestamp
+      ),
+      MINUTE
+    ) 
+  END AS minutes_since_last_purchase,
 
   -- 5. Audit Logic
-  COUNT(*) OVER (PARTITION BY (SELECT value.int_value FROM UNNEST(event_params) WHERE key = 'ga_session_id')) AS total_purchases_in_this_session
+  COUNT(*) OVER (
+    PARTITION BY user_pseudo_id, (SELECT value.int_value FROM UNNEST(event_params) WHERE key = 'ga_session_id')
+  ) AS total_purchases_in_this_session
 
 FROM
  `enter.tablename_123456.events_*`
 WHERE
   event_name = 'purchase'
   AND _TABLE_SUFFIX BETWEEN '20240101' AND '20251231'
+
+-- QUALIFY ensures we only look at duplicates where tracking was present
 QUALIFY total_purchases_in_this_session > 1
 ORDER BY ga_session_id, event_timestamp ASC
