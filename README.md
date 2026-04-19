@@ -1,5 +1,5 @@
 # OVERVIEW
-This repository contains Big Query code using Google Analytics raw data that will provide a summary of the Google Analytics data. The data studio dashboard (https://datastudio.google.com/reporting/47aa8820-3e4b-4844-8084-093acf00a59b) that brings many of the insights to life providing a summary helping to better understamd the business and the Google Analytics data. The dashboard covers: 
+This repository contains Big Query code using Google Analytics raw data that will provide a summary of the Google Analytics data. The data studio dashboard (https://datastudio.google.com/reporting/47aa8820-3e4b-4844-8084-093acf00a59b) brings many of the insights to life providing a summary helping to better understamd the business and the Google Analytics data. The dashboard covers: 
 
 1. Channel performance
 2. Landing page performance
