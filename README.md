@@ -1,5 +1,5 @@
 # OVERVIEW
-This repository contains Big Query code using Google Analytics raw data that will provide a summary of the Google Analytics data. The data studio dashboard (https://datastudio.google.com/reporting/47aa8820-3e4b-4844-8084-093acf00a59b) that brings will bring many of the insights to life providing a summary helping to better understamd the business and the Google Analytics data. The dashboard covers: 
+This repository contains Big Query code using Google Analytics raw data that will provide a summary of the Google Analytics data. The data studio dashboard (https://datastudio.google.com/reporting/47aa8820-3e4b-4844-8084-093acf00a59b) that brings many of the insights to life providing a summary helping to better understamd the business and the Google Analytics data. The dashboard covers: 
 
 1. Channel performance
 2. Landing page performance
@@ -20,7 +20,7 @@ The steps required:
 # THE WATCH-OUTS
 The key Watch-Outs: 
 
-1. The most critical step is having Google Analytics connected to Big Query, the 101-GA-Audit is using the default schema in Big Query + purchase event which will need to be setup in Google Tag Manager to provide the insights 
+1. The most critical step is having Google Analytics connected to Big Query, the 101-GA-Audit is using the default schema in Big Query + purchase event which will require setting up in Google Tag Manager to provide the insights 
 2. It's important to have the right architecture setup. The above shared GitHub GTM link helps with the architecture if a deeper aduit of events etc is needed
 3. The Big Query code - 101-GA-Audit is the one that should be connected to the dashboard
 4. The Big Query code - 101-GA-Audit-withnodatedimensions is the same as 101-GA-Audit but without the date breakdown if a deeper dive is required without dates  
@@ -29,7 +29,7 @@ The key Watch-Outs:
 7. Conversion Rate is the only calculated metric thay will need to be added - SUM(converted_sessions)/SUM(total_sessions)
 
 # FILTERING
-One of the key outputs from the audit will be how to filter data to provide a better view of performance. The options would be to either filter in Biq Query (hard filter) or in Data Studio (soft filter). 
+One of the outputs from the audit will be how to filter data to provide a better view of performance. The options would be to either filter in Biq Query (hard filter) or in Data Studio (soft filter). 
 
 Exclude In Big Query: 
 
